@@ -75,5 +75,6 @@ jobs:
       - name: Install dependencies (includinv dev + chemistry)
         run: |
           python -m pip install --upgrade pip poetry
-          poetry install
           pip install ms2deepscore spec2vec ms2query
+          poetry install
+          pip check
