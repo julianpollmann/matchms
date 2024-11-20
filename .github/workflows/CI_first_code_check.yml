@@ -75,33 +75,16 @@ jobs:
         with:
           python-version: '3.10'
 
-#    # 2. Check out package_b (abhängiges Repository)
-#    - name: Clone package_b repository
-#      run: |
-#        git clone https://github.com/iomega/spec2vec
-
-      - name: Install numpy ${{ matrix.numpy-version }}
-        run: |
-          pip install numpy==${{ matrix.numpy-version }}
+#      - name: Install numpy ${{ matrix.numpy-version }}
+#        run: |
+#          pip install numpy==${{ matrix.numpy-version }}
 
       - name: Build package and create dev environment
         run: |
           python -m pip install --upgrade pip poetry
+          poetry add numpy==${{ matrix.numpy-version }}
           poetry install
 
       - name: Show pip list
         run: |
           pip list
-
-#    # 5. Install package_b and resolve dependencies
-#    - name: Install package_b
-#      run: |
-#        cd spec2vec
-#        pip install -e .
-#        pip check # Überprüft Abhängigkeitskonflikte
-#
-#    # 6. Run Tests for package_b
-#    - name: Run Tests for package_b
-#      run: |
-#        cd spec2vec
-#        pytest --maxfail=5 --disable-warnings
