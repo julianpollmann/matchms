@@ -67,27 +67,36 @@ jobs:
       matrix:
         numpy-version: [1.24, 2.0]
         dependend-packages: [ 'spec2vec' ]
-    steps:
-      - uses: actions/checkout@v4
+      steps:
+      # 1. Check out package_a (aktuelles Repository)
+      - name: Check out package_a
+        uses: actions/checkout@v4
+
+      # 2. Check out package_b (abhängiges Repository)
+      - name: Clone package_b repository
+        run: |
+          git clone https://github.com/iomega/spec2vec
+
+      # 3. Set up Python environment
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      - name: Python info
+
+      # 4. Install package_a
+      - name: Install package_a
         run: |
-          which python
-          python --version
-      - name: Install specific numpy version
+          pip install -e .
+
+      # 5. Install package_b and resolve dependencies
+      - name: Install package_b
         run: |
-          pip install numpy==${{ matrix.numpy-version }}
-      - name: Install dependencies (includinv dev + chemistry)
+          cd spec2vec
+          pip install -e .
+          pip check # Überprüft Abhängigkeitskonflikte
+
+      # 6. Run Tests for package_b
+      - name: Run Tests for package_b
         run: |
-          python -m pip install --upgrade pip poetry
-          poetry install
-      - name: Install dependent packages
-        run: |
-          pip install ${{ matrix.dependend-packages }}
-          pip check
-      - name: Show pip list
-        run: |
-          pip list
+          cd spec2vec
+          pytest --maxfail=5 --disable-warnings
