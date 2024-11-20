@@ -69,6 +69,7 @@ jobs:
         dependend-packages: [ 'spec2vec' ]
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -82,6 +83,11 @@ jobs:
       - name: Install numpy ${{ matrix.numpy-version }}
         run: |
           pip install numpy==${{ matrix.numpy-version }}
+
+
+      - name: Show pip list
+        run: |
+          pip list
 
 #    # 5. Install package_b and resolve dependencies
 #    - name: Install package_b
