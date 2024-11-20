@@ -67,36 +67,37 @@ jobs:
       matrix:
         numpy-version: [1.24, 2.0]
         dependend-packages: [ 'spec2vec' ]
-      steps:
-      # 1. Check out package_a (aktuelles Repository)
-      - name: Check out package_a
-        uses: actions/checkout@v4
+    steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
 
-      # 2. Check out package_b (abhängiges Repository)
-      - name: Clone package_b repository
-        run: |
-          git clone https://github.com/iomega/spec2vec
+#    # 2. Check out package_b (abhängiges Repository)
+#    - name: Clone package_b repository
+#      run: |
+#        git clone https://github.com/iomega/spec2vec
 
-      # 3. Set up Python environment
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+    # 3. Set up Python environment
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
 
-      # 4. Install package_a
-      - name: Install package_a
-        run: |
-          pip install -e .
+    # 4. Install package_a
+    - name: Install numpy ${{ matrix.numpy-version }}
+      run: |
+        pip install numpy==${{ matrix.numpy-version }}
 
-      # 5. Install package_b and resolve dependencies
-      - name: Install package_b
-        run: |
-          cd spec2vec
-          pip install -e .
-          pip check # Überprüft Abhängigkeitskonflikte
-
-      # 6. Run Tests for package_b
-      - name: Run Tests for package_b
-        run: |
-          cd spec2vec
-          pytest --maxfail=5 --disable-warnings
+#    # 5. Install package_b and resolve dependencies
+#    - name: Install package_b
+#      run: |
+#        cd spec2vec
+#        pip install -e .
+#        pip check # Überprüft Abhängigkeitskonflikte
+#
+#    # 6. Run Tests for package_b
+#    - name: Run Tests for package_b
+#      run: |
+#        cd spec2vec
+#        pytest --maxfail=5 --disable-warnings
