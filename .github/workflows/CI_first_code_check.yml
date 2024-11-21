@@ -65,7 +65,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        numpy-version: [1.24, 2.0]
+        numpy-version: [1.25, 2.0]
         dependend-packages: [ 'spec2vec' ]
     steps:
       - uses: actions/checkout@v4
