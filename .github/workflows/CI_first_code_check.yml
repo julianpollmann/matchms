@@ -60,13 +60,13 @@ jobs:
 #        run: isort . --check-only --diff
 
   test_ecosystem:
-    name: Test ecosystem / python-3.10 /  ecosystem-${{ matrix.dependend-packages }} / ubuntu-latest
+    name: Test ecosystem / python-3.10 / ${{ matrix.dependend-packages }} / ubuntu-latest
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         #numpy-version: [1.25, 2.0]
-        dependend-packages: [ 'ms2deepscore', 'ms2query']
+        dependend-packages: [ 'ms2deepscore', 'ms2query', 'spec2vec' ]
     steps:
       - uses: actions/checkout@v4
 
@@ -81,9 +81,6 @@ jobs:
           pip install ${{ matrix.dependend-packages }}
           pip install .
           pip check
-#          poetry add numpy==${{ matrix.numpy-version }}
-#          poetry add ${{ matrix.dependend-packages }}
-#          poetry install
 
       - name: Show pip list
         run: |
