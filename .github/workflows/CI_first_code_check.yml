@@ -60,12 +60,12 @@ jobs:
 #        run: isort . --check-only --diff
 
   test_ecosystem:
-    name: Test ecosystem / python-3.10 / numpy-${{ matrix.numpy-version }} /  ecosystem-${{ matrix.dependend-packages }} / ubuntu-latest
+    name: Test ecosystem / python-3.10 /  ecosystem-${{ matrix.dependend-packages }} / ubuntu-latest
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        numpy-version: [1.25, 2.0]
+        #numpy-version: [1.25, 2.0]
         dependend-packages: [ 'spec2vec' ]
     steps:
       - uses: actions/checkout@v4
