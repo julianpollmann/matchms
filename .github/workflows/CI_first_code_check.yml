@@ -66,7 +66,7 @@ jobs:
       fail-fast: false
       matrix:
         #numpy-version: [1.25, 2.0]
-        dependend-packages: [ 'ms2deepscore' ]
+        dependend-packages: [ 'ms2deepscore', 'ms2query']
     steps:
       - uses: actions/checkout@v4
 
