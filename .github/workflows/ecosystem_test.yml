@@ -38,6 +38,10 @@ jobs:
         run: |
           pip list
 
+      - name: Generate Badge URLs
+        run: |
+          echo "![Build: python-3.11 / numpy-${{ matrix.numpy-version }} / ${{ matrix.dependent-packages }}](https://github.com/${{ github.repository }}/actions/workflows/${{ github.workflow }}/badge.svg?branch=${{ github.ref_name }}&numpy=${{ matrix.numpy-version }}&package=${{ matrix.dependent-packages }})"
+
 #      - name: Generate Badge URLs
 #        run: |
 #          echo "![Build: python-3.11 / numpy-${{ matrix.numpy-version }} / ${{ matrix.dependent-packages }}](https://github.com/${{ github.repository }}/actions/workflows/${{ github.workflow }}/badge.svg?branch=${{ github.ref_name }}&numpy=${{ matrix.numpy-version }}&package=${{ matrix.dependent-packages }})" >> badges.md
