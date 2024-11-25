@@ -11,7 +11,7 @@ on:
 
 jobs:
   test_ecosystem:
-    name: numpy-${{ matrix.numpy-version }} / ${{ matrix.dependent-packages }}
+    name: numpy-${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
