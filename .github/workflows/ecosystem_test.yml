@@ -38,10 +38,20 @@ jobs:
         run: |
           pip list
 
-      - name: Generate Badge URLs
+      - name: Save status for Shields.io
         run: |
-          echo "![Build: python-3.11 / numpy-${{ matrix.numpy-version }} / ${{ matrix.dependent-packages }}](https://github.com/${{ github.repository }}/actions/workflows/${{ github.workflow }}/badge.svg?branch=${{ github.ref_name }}&numpy=${{ matrix.numpy-version }}&package=${{ matrix.dependent-packages }})"
+          echo "::set-output name=job_status::${{ job.status }}"
+          echo "::set-output name=numpy_version::${{ matrix.numpy-version }}"
+          echo "::set-output name=package::${{ matrix.dependent-packages }}"
 
-#      - name: Generate Badge URLs
-#        run: |
-#          echo "![Build: python-3.11 / numpy-${{ matrix.numpy-version }} / ${{ matrix.dependent-packages }}](https://github.com/${{ github.repository }}/actions/workflows/${{ github.workflow }}/badge.svg?branch=${{ github.ref_name }}&numpy=${{ matrix.numpy-version }}&package=${{ matrix.dependent-packages }})" >> badges.md
+      - name: Generate Shields.io badge URL
+        run: |
+          BASE_URL="https://img.shields.io/badge"
+          LABEL="Matchms-numpy_${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}"
+          STATUS="${{ steps.save-status.outputs.job_status }}"
+          COLOR="green"
+          if [[ "${STATUS}" == "failed" ]]; then
+            COLOR="red"
+          fi
+          BADGE_URL="${BASE_URL}/${LABEL}-${STATUS}-${COLOR}"
+          echo "Badge URL: ${BADGE_URL}"
