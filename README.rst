@@ -153,7 +153,7 @@ To date, we are aware of:
 
 ### Package compatibility
 
-![Test ecosystem / python-3.11 / numpy-1.25 / ms2deepscore](https://github.com/julianpollmann/matchms/actions/workflows/ecosystem_test.yml/badge.svg?branch=main)
+![Test ecosystem / python-3.11 / numpy-1.25 / ms2deepscore](https://github.com/julianpollmann/matchms/actions/workflows/ecosystem_test.yml/badge.svg?branch=package_quality%2Fadd_ecosystem_workflow)
 
 
 Introduction
