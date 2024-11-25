@@ -17,6 +17,10 @@ jobs:
       fail-fast: false
       matrix:
         numpy-version: [ 1.25, 2.1 ]
+
+    outputs:
+      json-path: result.json
+
     steps:
       - uses: actions/checkout@v4
 
@@ -45,8 +49,7 @@ jobs:
               "numpy-version": "${{ matrix.numpy-version }}"
             }
           }' > result.json
-        outputs:
-          json-path: result.json
+
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
