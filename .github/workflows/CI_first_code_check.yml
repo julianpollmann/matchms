@@ -78,7 +78,7 @@ jobs:
       - name: Build package and create dev environment
         run: |
           python -m pip install --upgrade pip poetry
-          pip install ${{ matrix.numpy-version }}
+          pip install numpy==${{ matrix.numpy-version }}
           pip install ${{ matrix.dependend-packages }}
           pip install .
           pip check
