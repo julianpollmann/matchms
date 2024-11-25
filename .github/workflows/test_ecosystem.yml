@@ -36,6 +36,24 @@ jobs:
         run: |
           pip list
 
+      - name: Generate job result
+        run: |
+          echo '{
+            "job_name": "generate-artifact",
+            "status": "${{ job.status }}",
+            "results": {
+              "numpy-version": "${{ matrix.numpy-version }}"
+            }
+          }' > result.json
+        outputs:
+          json-path: result.json
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: job-result
+          path: result.json
+
 #      - name: Save status for Shields.io
 #        run: |
 #          echo "::set-output name=job_status::${{ job.status }}"
