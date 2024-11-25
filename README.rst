@@ -151,6 +151,11 @@ To date, we are aware of:
 
 *(if you know of any other packages that are fully compatible with matchms, let us know!)*
 
+### Package compatibility
+
+![Test ecosystem / python-3.11 / numpy-1.25 / ms2deepscore](https://github.com/julianpollmann/matchms/actions/workflows/ecosystem_test.yml/badge.svg?branch=main)
+
+
 Introduction
 ============
 
