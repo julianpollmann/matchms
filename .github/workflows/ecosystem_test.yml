@@ -11,7 +11,7 @@ on:
 
 jobs:
   test_ecosystem:
-    name: Test ecosystem / python-3.11 / numpy-${{ matrix.numpy-version }} / ${{ matrix.dependend-packages }} / ubuntu-latest
+    name: Test ecosystem / python-3.11 / numpy-${{ matrix.numpy-version }} / ${{ matrix.dependent-packages }} / ubuntu-latest
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -38,14 +38,6 @@ jobs:
         run: |
           pip list
 
-      - name: Generate status badge
-        id: badge
-        run: |
-          echo "Generating badge for numpy-${{ matrix.numpy-version }} / ${{ matrix.dependent-packages }}"
-          echo "https://img.shields.io/badge/matchms-numpy-${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}-green" > badge-numpy-${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}.svg
-
-      - name: Upload badge
-        uses: actions/upload-artifact@v4
-        with:
-          name: badge-numpy-${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}
-          path: badge-numpy-${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}.svg
+#      - name: Generate Badge URLs
+#        run: |
+#          echo "![Build: python-3.11 / numpy-${{ matrix.numpy-version }} / ${{ matrix.dependent-packages }}](https://github.com/${{ github.repository }}/actions/workflows/${{ github.workflow }}/badge.svg?branch=${{ github.ref_name }}&numpy=${{ matrix.numpy-version }}&package=${{ matrix.dependent-packages }})" >> badges.md
