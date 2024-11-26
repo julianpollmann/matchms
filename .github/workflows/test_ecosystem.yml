@@ -14,6 +14,7 @@ jobs:
   test_ecosystem:
     uses: ./.github/workflows/test_dependency.yml
     strategy:
+      fail-fast: false
       matrix:
         numpy-version: [1.25, 2.1]
         dependent-packages: ["ms2deepscore", "spec2vec"]
