@@ -13,9 +13,13 @@ on:
 jobs:
   test_ecosystem:
     uses: ./.github/workflows/test_dependency.yml
+    strategy:
+      matrix:
+        numpy-version: [1.25, 2.1]
+        dependent-packages: ["ms2deepscore", "spec2vec"]
     with:
-      numpy-version: 1.25
-      dependent-packages: "ms2deepscore"
+      numpy-version: ${{ matrix.numpy-version }}
+      dependent-packages: ${{ matrix.dependent-packages }}
     secrets: inherit
 
 #jobs:
