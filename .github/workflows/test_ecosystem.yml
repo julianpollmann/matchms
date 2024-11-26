@@ -15,7 +15,7 @@ jobs:
     uses: ./.github/workflows/test_dependency.yml
     with:
       numpy-version: 1.25
-      dependent-packages: "spec2vec"
+      dependent-packages: "ms2deepscore"
     secrets: inherit
 
 #jobs:

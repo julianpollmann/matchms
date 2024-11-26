@@ -12,7 +12,7 @@ on:
 
 jobs:
   test_dependency:
-    name: Test ecosystem / numpy-${{ inputs.numpy-version }} / ${{ inputs.dependent-packages }}
+    name: numpy-${{ inputs.numpy-version }} / ${{ inputs.dependent-packages }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
