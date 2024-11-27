@@ -40,13 +40,6 @@ jobs:
         run: |
           set -v
           mkdir -p ./pr
-          echo "Running pip show for ${{ matrix.dependent-packages }}"
-          pip show "${{ matrix.dependent-packages }}"
-
-
-
-
-
 
           version=$(pip show "${{ matrix.dependent-packages }}" | grep Version | awk '{print $2}')
 
@@ -85,28 +78,83 @@ jobs:
       - name: Create results table
         run: |
           cd pr
-            echo "| Package name | latest | stable |" > dependency-test-matrix.md
-            echo "|--|--|--|" >> dependency-test-matrix.md
-            count=0
-            for file in *
-            do
-              [ "$file" == "NR" ] && continue
-              [ "$file" == "dependency-test-matrix.md" ] && continue
-              if [ $count == "0" ]; then
-                name=$(echo $file | cut -f1 -d-)
-                echo -n "| $name | "
+
+          output_file="dependency-matrix.rst"
+          numpy_versions=("1.25" "2.1")
+          packages=()
+
+          for file in pr/*.json; do
+            package=$(jq -r '.package' "$file")
+            packages+=("$package")
+          done
+
+          {
+            echo ".. list-table::"
+            echo "   :header-rows: 1"
+            echo ""
+            echo "   * - numpy"
+            for package in "${packages[@]}"; do
+              echo "     - $package"
+            done
+          } > "$output_file"
+
+          # Inhalte für jede numpy-Version hinzufügen
+          for numpy_version in "${numpy_versions[@]}"; do
+            echo "   * - .. image:: https://img.shields.io/badge/numpy-${numpy_version}-green?logo=numpy :alt: numpy" >> "$output_file"
+            for package in "${packages[@]}"; do
+              json_file="pr/$package.json"
+              if [[ -f $json_file ]]; then
+                version=$(jq -r '.version' "$json_file")
+                run_success=$(jq -r '.run_success' "$json_file")
+                if [[ "$run_success" == "true" ]]; then
+                  status="green"
+                else
+                  status="red"
+                fi
+                echo "     - .. image:: https://img.shields.io/badge/$package-$version-$status :alt: $package" >> "$output_file"
               else
-                echo -n "| "
+                echo "     - .. image:: https://img.shields.io/badge/$package-unknown-lightgrey :alt: $package" >> "$output_file"
               fi
-              cat $file
-              if [ $count == "0" ]; then
-                echo -n " "
-                count=1
-              else
-                echo " |"
-                count=0
-              fi
-            done >> dependency-test-matrix.md
+            done
+          done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#            echo "| Package name | latest | stable |" > dependency-test-matrix.md
+#            echo "|--|--|--|" >> dependency-test-matrix.md
+#            count=0
+#            for file in *
+#            do
+#              [ "$file" == "NR" ] && continue
+#              [ "$file" == "dependency-test-matrix.md" ] && continue
+#              if [ $count == "0" ]; then
+#                name=$(echo $file | cut -f1 -d-)
+#                echo -n "| $name | "
+#              else
+#                echo -n "| "
+#              fi
+#              cat $file
+#              if [ $count == "0" ]; then
+#                echo -n " "
+#                count=1
+#              else
+#                echo " |"
+#                count=0
+#              fi
+#            done >> dependency-test-matrix.md
 
       - uses: actions/upload-artifact@v4
         with:
