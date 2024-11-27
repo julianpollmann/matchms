@@ -79,7 +79,7 @@ jobs:
             for file in *
             do
               [ "$file" == "NR" ] && continue
-              [ "$file" == "MSG" ] && continue
+              [ "$file" == "dependency-test-matrix.md" ] && continue
               if [ $count == "0" ]; then
                 name=$(echo $file | cut -f1 -d-)
                 echo -n "| $name | "
