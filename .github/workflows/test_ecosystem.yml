@@ -80,14 +80,15 @@ jobs:
           cd pr
 
           output_file="dependency-matrix.rst"
-          numpy_versions=("1.25" "2.1")
           packages=()
 
+          # JSON-Dateien durchlaufen und Paketnamen sammeln
           for file in *.json; do
             package=$(jq -r '.package' "$file")
             packages+=("$package")
           done
 
+          # Tabelle mit Kopfzeile und Numpy-Spalte erstellen
           {
             echo ".. list-table::"
             echo "   :header-rows: 1"
@@ -99,24 +100,28 @@ jobs:
           } > "$output_file"
 
           # Inhalte für jede numpy-Version hinzufügen
-          for numpy_version in "${numpy_versions[@]}"; do
-            echo "   * - .. image:: https://img.shields.io/badge/numpy-${numpy_version}-green?logo=numpy :alt: numpy" >> "$output_file"
-            for package in "${packages[@]}"; do
-              json_file="$package.json"
-              if [[ -f $json_file ]]; then
-                version=$(jq -r '.version' "$json_file")
-                run_success=$(jq -r '.run_success' "$json_file")
-                if [[ "$run_success" == "true" ]]; then
-                  status="green"
-                else
-                  status="red"
-                fi
-                echo "     - .. image:: https://img.shields.io/badge/$package-$version-$status :alt: $package" >> "$output_file"
+          for package in "${packages[@]}"; do
+            json_file="$package.json"
+            if [[ -f $json_file ]]; then
+              numpy_version=$(jq -r '.["numpy-version"]' "$json_file")  # numpy-version aus der JSON extrahieren
+              echo "   * - .. image:: https://img.shields.io/badge/numpy-${numpy_version}-green?logo=numpy :alt: numpy" >> "$output_file"
+
+              version=$(jq -r '.version' "$json_file")
+              run_success=$(jq -r '.run_success' "$json_file")
+
+              if [[ "$run_success" == "true" ]]; then
+                status="green"
               else
-                echo "     - .. image:: https://img.shields.io/badge/$package-unknown-lightgrey :alt: $package" >> "$output_file"
+                status="red"
               fi
-            done
+
+              # Badge für jedes Paket erstellen
+              echo "     - .. image:: https://img.shields.io/badge/$package-$version-$status :alt: $package" >> "$output_file"
+            else
+              echo "     - .. image:: https://img.shields.io/badge/$package-unknown-lightgrey :alt: $package" >> "$output_file"
+            fi
           done
+
 
 
 
