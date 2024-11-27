@@ -43,14 +43,12 @@ jobs:
           echo "Running pip show for ${{ matrix.dependent-packages }}"
           pip show "${{ matrix.dependent-packages }}"
 
+
+
+
+
+
           version=$(pip show "${{ matrix.dependent-packages }}" | grep Version | awk '{print $2}')
-          echo "Detected version: $version"
-
-
-
-
-
-          version=pip show ${{ matrix.dependent-packages }} | grep Version | awk '{print $2}'
 
           if pip check; then
             echo "{\"package\": \"${{ matrix.dependent-packages }}\", \"version\": \"$version\", \"numpy-version\": \"1.25\", \"run_success\": true}" >> pr/result-${{ matrix.dependent-packages }}.json
