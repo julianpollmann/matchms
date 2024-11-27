@@ -65,6 +65,11 @@ jobs:
 
       - run: ls
 
+      - name: List files
+        run: |
+          cd pr
+          ls
+
       - name: Create results table
         run: |
             cd pr
@@ -89,7 +94,7 @@ jobs:
                 echo " |"
                 count=0
               fi
-            done >> pr/dependency-test-matrix.md
+            done >> dependency-test-matrix.md
 
       - uses: actions/upload-artifact@v4
         with:
