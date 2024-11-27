@@ -83,7 +83,7 @@ jobs:
           numpy_versions=("1.25" "2.1")
           packages=()
 
-          for file in pr/*.json; do
+          for file in *.json; do
             package=$(jq -r '.package' "$file")
             packages+=("$package")
           done
