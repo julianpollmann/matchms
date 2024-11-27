@@ -38,10 +38,11 @@ jobs:
 
       - name: Save compatibility result
         run: |
-          if [ $? -eq 0 ]; then
+          if pip check; then
             echo ".. image:: https://img.shields.io/badge/${{ matrix.dependent-packages }}-latest-green :alt: ${{ matrix.dependent-packages }} compatible" >> ${{ matrix.dependent-packages }}.rst
           else
             echo ".. image:: https://img.shields.io/badge/${{ matrix.dependent-packages }}-latest-red :alt: ${{ matrix.dependent-packages }} incompatible" >> ${{ matrix.dependent-packages }}.rst
+          fi
         shell: bash
 
       - uses: actions/upload-artifact@v4
