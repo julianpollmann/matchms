@@ -91,8 +91,8 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: pr
-          path: pr/
+          name: dependency-test-results
+          path: dependency-test-results.rst
 
 
 #jobs:
