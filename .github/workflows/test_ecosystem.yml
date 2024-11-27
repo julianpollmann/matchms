@@ -38,10 +38,12 @@ jobs:
 
       - name: Save compatibility result
         run: |
+          set -v
+          mkdir -p ./pr
           if pip check; then
-            echo ".. image:: https://img.shields.io/badge/${{ matrix.dependent-packages }}-latest-green :alt: ${{ matrix.dependent-packages }} compatible" >> ${{ matrix.dependent-packages }}.rst
+            echo ".. image:: https://img.shields.io/badge/${{ matrix.dependent-packages }}-latest-green :alt: ${{ matrix.dependent-packages }} compatible" >> pr/${{ matrix.dependent-packages }}.rst
           else
-            echo ".. image:: https://img.shields.io/badge/${{ matrix.dependent-packages }}-latest-red :alt: ${{ matrix.dependent-packages }} incompatible" >> ${{ matrix.dependent-packages }}.rst
+            echo ".. image:: https://img.shields.io/badge/${{ matrix.dependent-packages }}-latest-red :alt: ${{ matrix.dependent-packages }} incompatible" >> pr/${{ matrix.dependent-packages }}.rst
           fi
         shell: bash
 
