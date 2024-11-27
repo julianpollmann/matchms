@@ -1,4 +1,4 @@
-name: Test ecosystem with individual badges
+name: TestEcosystem
 
 on:
   pull_request:
