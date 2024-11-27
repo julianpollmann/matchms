@@ -102,7 +102,7 @@ jobs:
           for numpy_version in "${numpy_versions[@]}"; do
             echo "   * - .. image:: https://img.shields.io/badge/numpy-${numpy_version}-green?logo=numpy :alt: numpy" >> "$output_file"
             for package in "${packages[@]}"; do
-              json_file="pr/$package.json"
+              json_file="$package.json"
               if [[ -f $json_file ]]; then
                 version=$(jq -r '.version' "$json_file")
                 run_success=$(jq -r '.run_success' "$json_file")
