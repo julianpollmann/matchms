@@ -1,4 +1,4 @@
-name: Test ecosystem with individual badges
+name: TestEcosystem
 
 on:
   pull_request:
@@ -10,15 +10,13 @@ on:
         default: ''
 
 jobs:
-  break:
+  test_dependencies:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        dependent-packages: [
-          "spec2vec",
-        ]
-#        pkgversion: [latest, stable]
+        dependent-packages: ["spec2vec"]
+        numpy-version: [1.25, 2.1]
 
     steps:
       - uses: actions/checkout@v4
@@ -31,6 +29,7 @@ jobs:
       - name: Install dependent packages
         run: |
           python -m pip install --upgrade pip poetry
+          pip install numpy==${{ matrix.numpy-version }}
           pip install ${{ matrix.dependent-packages }}
           pip install .
           pip check
@@ -38,59 +37,92 @@ jobs:
 
       - name: Save compatibility result
         run: |
+          set -v
+          mkdir -p ./pr
+
+          version=$(pip show "${{ matrix.dependent-packages }}" | grep Version | awk '{print $2}')
+
           if pip check; then
-            echo ".. image:: https://img.shields.io/badge/${{ matrix.dependent-packages }}-latest-green :alt: ${{ matrix.dependent-packages }} compatible" >> ${{ matrix.dependent-packages }}.rst
+            echo "{\"package\": \"${{ matrix.dependent-packages }}\", \"version\": \"$version\", \"numpy-version\": \"${{ matrix.numpy-version }}\", \"run_success\": true}" >> pr/${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}.json
           else
-            echo ".. image:: https://img.shields.io/badge/${{ matrix.dependent-packages }}-latest-red :alt: ${{ matrix.dependent-packages }} incompatible" >> ${{ matrix.dependent-packages }}.rst
+            echo "{\"package\": \"${{ matrix.dependent-packages }}\", \"version\": \"$version\", \"numpy-version\": \"${{ matrix.numpy-version }}\", \"run_success\": false}" >> pr/${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}.json
           fi
         shell: bash
 
       - uses: actions/upload-artifact@v4
         with:
-          name: pr
+          name: dependency-results-${{ matrix.numpy-version }}
           path: pr/
 
-  upload:
-    needs: break
+  combine_results:
+    needs: test_dependencies
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/download-artifact@v4
         with:
-          name: pr
+          name: dependency-results-${{ matrix.numpy-version }}
           path: pr/
 
       - run: ls
-      - run: |
+
+      - name: List files
+        run: |
           cd pr
-          echo "| Package name | latest | stable |" > MSG
-          echo "|--|--|--|" >> MSG
-          count=0
-          for file in *
-          do
-            [ "$file" == "NR" ] && continue
-            [ "$file" == "MSG" ] && continue
-            if [ $count == "0" ]; then
-              name=$(echo $file | cut -f1 -d-)
-              echo -n "| $name | "
+          ls
+
+      - name: Create results table
+        run: |
+          cd pr
+
+          output_file="dependency-matrix.rst"
+          packages=()
+
+          # JSON-Dateien durchlaufen und Paketnamen sammeln
+          for file in *.json; do
+            package=$(jq -r '.package' "$file")
+            packages+=("$package")
+          done
+
+          # Tabelle mit Kopfzeile und Numpy-Spalte erstellen
+          {
+            echo ".. list-table::"
+            echo "   :header-rows: 1"
+            echo ""
+            echo "   * - numpy"
+            for package in "${packages[@]}"; do
+              echo "     - $package"
+            done
+          } > "$output_file"
+
+          # Inhalte für jede numpy-Version hinzufügen
+          for package in "${packages[@]}"; do
+            json_file="$package.json"
+            if [[ -f $json_file ]]; then
+              numpy_version=$(jq -r '.["numpy-version"]' "$json_file")  # numpy-version aus der JSON extrahieren
+              echo "   * - .. image:: https://img.shields.io/badge/numpy-${numpy_version}-green?logo=numpy :alt: numpy" >> "$output_file"
+
+              version=$(jq -r '.version' "$json_file")
+              run_success=$(jq -r '.run_success' "$json_file")
+
+              if [[ "$run_success" == "true" ]]; then
+                status="green"
+              else
+                status="red"
+              fi
+
+              # Badge für jedes Paket erstellen
+              echo "     - .. image:: https://img.shields.io/badge/$package-$version-$status :alt: $package" >> "$output_file"
             else
-              echo -n "| "
+              echo "     - .. image:: https://img.shields.io/badge/$package-unknown-lightgrey :alt: $package" >> "$output_file"
             fi
-            cat $file
-            if [ $count == "0" ]; then
-              echo -n " "
-              count=1
-            else
-              echo " |"
-              count=0
-            fi
-          done >> MSG
+          done
 
       - uses: actions/upload-artifact@v4
         with:
-          name: pr
-          path: pr/
+          name: dependency-test-matrix
+          path: pr
 
 
 #jobs:
