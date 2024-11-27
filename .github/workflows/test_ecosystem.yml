@@ -40,6 +40,16 @@ jobs:
         run: |
           set -v
           mkdir -p ./pr
+          echo "Running pip show for ${{ matrix.dependent-packages }}"
+          pip show "${{ matrix.dependent-packages }}"
+
+          version=$(pip show "${{ matrix.dependent-packages }}" | grep Version | awk '{print $2}')
+          echo "Detected version: $version"
+
+
+
+
+
           version=pip show ${{ matrix.dependent-packages }} | grep Version | awk '{print $2}'
 
           if pip check; then
