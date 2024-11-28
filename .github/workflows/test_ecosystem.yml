@@ -17,6 +17,9 @@ jobs:
       matrix:
         dependent-packages: ["spec2vec"]
         numpy-version: [1.25, 2.1]
+    outputs:
+      numpy1: ${{ steps.set_numpy_version.outputs.numpy1 }}
+      numpy2: ${{ steps.set_numpy_version.outputs.numpy2 }}
 
     steps:
       - uses: actions/checkout@v4
@@ -24,7 +27,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependent packages
         run: |
@@ -34,6 +37,17 @@ jobs:
           pip install .
           pip check
         continue-on-error: true
+
+      - name: Set numpy version
+        id: set_numpy_version
+        run: |
+          numpy_version="${{ matrix.numpy-version }}"
+
+          if [[ $numpy_version == 2* ]]; then
+              echo "numpy2=${numpy_version}" >> "$GITHUB_OUTPUT"
+          else
+              echo "numpy1=${numpy_version}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Save compatibility result
         run: |
@@ -64,6 +78,11 @@ jobs:
         with:
           name: dependency-results-${{ matrix.numpy-version }}
           path: pr/
+
+      - env:
+          OUTPUT1: ${{needs.test_dependencies.outputs.numpy1}}
+          OUTPUT2: ${{needs.test_dependencies.outputs.numpy2}}
+        run: echo "$OUTPUT1 $OUTPUT2"
 
       - run: ls
 
