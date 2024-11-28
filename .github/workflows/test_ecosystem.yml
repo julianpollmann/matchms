@@ -109,20 +109,18 @@ jobs:
           for numpy_version in "${numpy_versions[@]}"; do
             outstring="| ![Static Badge](https://img.shields.io/badge/numpy-${numpy_version}-lightgrey?logo=numpy) | "
 
-            json_files=$(ls ${numpy_version}-*.json 2>/dev/null)
-
-            spec2vec_file = ls ${numpy_version}-spec2vec.json 2>/dev/null
-            ms2query_file = ls ${numpy_version}-ms2query.json2>/dev/null
+            spec2vec_file=$(ls ${numpy_version}-spec2vec.json 2>/dev/null)
+            ms2query_file=$(ls ${numpy_version}-ms2query.json 2>/dev/null)
 
             if [[ -n "$spec2vec_file" ]]; then
-              package=$(jq -r '.package' "$json_file")
-              version=$(jq -r '.version' "$json_file")
-              run_success=$(jq -r '.run_success' "$json_file")
+              package=$(jq -r '.package' "$spec2vec_file")
+              version=$(jq -r '.version' "$spec2vec_file")
+              run_success=$(jq -r '.run_success' "$spec2vec_file")
 
               badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
 
               outstring="${outstring}| ${badge_color} |"
-            else:
+            else
               outstring="${outstring}| |"
             fi
 
@@ -134,14 +132,11 @@ jobs:
               badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
 
               outstring="${outstring}| ${badge_color} |"
-            else:
+            else
               outstring="${outstring}| |"
             fi
 
-
-
-
-             echo $outstring >> output_file
+            echo $outstring >> output_file
           done
 
 
