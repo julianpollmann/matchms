@@ -48,19 +48,6 @@ jobs:
               echo "numpy1=${numpy_version}" >> "$GITHUB_OUTPUT"
           fi
 
-#      - name: Set numpy versions
-#        id: finalize-versions
-#        run: |
-#          if [ -f numpy_versions.json ]; then
-#            numpy_versions=$(cat numpy_versions.json | jq --arg version "${{ matrix.numpy-version }}" '. + [$version]')
-#          else
-#            numpy_versions=$(echo '["${{ matrix.numpy-version }}"]' | jq '.')
-#          fi
-#          echo "$numpy_versions" > numpy_versions.json
-#          echo "::set-output name=numpy_versions::$numpy_versions"
-
-
-
       - name: Save compatibility result
         run: |
           set -v
@@ -123,47 +110,48 @@ jobs:
           cd pr
 
           output_file="dependency-matrix.rst"
-          packages=()
 
-          # JSON-Dateien durchlaufen und Paketnamen sammeln
-          for file in *.json; do
-            package=$(jq -r '.package' "$file")
-            packages+=("$package")
+          # Start der Tabelle
+          cat <<EOF > "$output_file"
+          .. list-table::
+             :header-rows: 1
+
+             * - numpy
+               - spec2vec
+               - ms2query
+          EOF
+
+          # Array für die numpy-Versionen, basierend auf den JSON-Dateien
+          numpy_versions=("${{ env.NUMPY1 }}" "${{ env.NUMPY2 }}")
+
+          # Iteriere über alle numpy-Versionen
+          for numpy_version in $numpy_versions; do
+            # Extrahiere spec2vec-Daten aus der JSON-Datei
+            spec2vec_file="pr/${numpy_version}-spec2vec.json"
+            spec2vec_package=$(jq -r '.package' "$spec2vec_file")
+            spec2vec_version=$(jq -r '.version' "$spec2vec_file")
+            spec2vec_success=$(jq -r '.run_success' "$spec2vec_file")
+
+            # Extrahiere ms2query-Daten aus der JSON-Datei
+            ms2query_file="pr/${numpy_version}-ms2query.json"
+            ms2query_package=$(jq -r '.package' "$ms2query_file")
+            ms2query_version=$(jq -r '.version' "$ms2query_file")
+            ms2query_success=$(jq -r '.run_success' "$ms2query_file")
+
+            # Bestimme die Badge-Farbe je nach Erfolg des Runs
+            spec2vec_color=$([[ "$spec2vec_success" == "true" ]] && echo "green" || echo "red")
+            ms2query_color=$([[ "$ms2query_success" == "true" ]] && echo "green" || echo "red")
+
+            # Zeile zur Tabelle hinzufügen
+            cat <<EOF >> "$output_file"
+             * - .. image:: https://img.shields.io/badge/numpy-${numpy_version}-green?logo=numpy :alt: numpy
+               - .. image:: https://img.shields.io/badge/${spec2vec_package}-${spec2vec_version}-${spec2vec_color} :alt: ${spec2vec_package}
+               - .. image:: https://img.shields.io/badge/${ms2query_package}-${ms2query_version}-${ms2query_color} :alt: ${ms2query_package}
+          EOF
           done
 
-          # Tabelle mit Kopfzeile und Numpy-Spalte erstellen
-          {
-            echo ".. list-table::"
-            echo "   :header-rows: 1"
-            echo ""
-            echo "   * - numpy"
-            for package in "${packages[@]}"; do
-              echo "     - $package"
-            done
-          } > "$output_file"
-
-          # Inhalte für jede numpy-Version hinzufügen
-          for package in "${packages[@]}"; do
-            json_file="$package.json"
-            if [[ -f $json_file ]]; then
-              numpy_version=$(jq -r '.["numpy-version"]' "$json_file")  # numpy-version aus der JSON extrahieren
-              echo "   * - .. image:: https://img.shields.io/badge/numpy-${numpy_version}-green?logo=numpy :alt: numpy" >> "$output_file"
-
-              version=$(jq -r '.version' "$json_file")
-              run_success=$(jq -r '.run_success' "$json_file")
-
-              if [[ "$run_success" == "true" ]]; then
-                status="green"
-              else
-                status="red"
-              fi
-
-              # Badge für jedes Paket erstellen
-              echo "     - .. image:: https://img.shields.io/badge/$package-$version-$status :alt: $package" >> "$output_file"
-            else
-              echo "     - .. image:: https://img.shields.io/badge/$package-unknown-lightgrey :alt: $package" >> "$output_file"
-            fi
-          done
+          # Ausgabe fertig
+          echo "Tabelle erstellt: $output_file"
 
       - uses: actions/upload-artifact@v4
         with:
