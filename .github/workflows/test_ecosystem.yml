@@ -38,9 +38,9 @@ jobs:
           pip check
         continue-on-error: true
 
-      - name: Set numpy versions
-        id: finalize-versions
-        run: |
+#      - name: Set numpy versions
+#        id: finalize-versions
+#        run: |
 #          if [ -f numpy_versions.json ]; then
 #            numpy_versions=$(cat numpy_versions.json | jq --arg version "${{ matrix.numpy-version }}" '. + [$version]')
 #          else
