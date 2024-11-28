@@ -41,6 +41,7 @@ jobs:
       - name: Set numpy version
         id: set_numpy_version
         run: |
+          numpy_version="${{ matrix.numpy-version }}"
           if [[ $numpy_version == 2* ]]; then
               echo "numpy2=${numpy_version}" >> "$GITHUB_OUTPUT"
           else
