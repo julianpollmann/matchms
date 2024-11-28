@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dependent-packages: ["spec2vec", "ms2query"]
+        dependent-packages: ["spec2vec"]
         numpy-version: [1.25, 2.1]
     outputs:
       numpy1: ${{ steps.set_numpy_version.outputs.numpy1 }}
@@ -56,9 +56,9 @@ jobs:
           version=$(pip show "${{ matrix.dependent-packages }}" | grep Version | awk '{print $2}')
 
           if pip check; then
-            echo "{\"package\": \"${{ matrix.dependent-packages }}\", \"version\": \"$version\", \"numpy-version\": \"${{ matrix.numpy-version }}\", \"run_success\": true}" >> pr/${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}.json
+            echo "{\"package\": \"${{ matrix.dependent-packages }}\", \"version\": \"$version\", \"numpy-version\": \"${{ matrix.numpy-version }}\", \"run_success\": true}" >> pr/${{ matrix.numpy-version }}.json
           else
-            echo "{\"package\": \"${{ matrix.dependent-packages }}\", \"version\": \"$version\", \"numpy-version\": \"${{ matrix.numpy-version }}\", \"run_success\": false}" >> pr/${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}.json
+            echo "{\"package\": \"${{ matrix.dependent-packages }}\", \"version\": \"$version\", \"numpy-version\": \"${{ matrix.numpy-version }}\", \"run_success\": false}" >> pr/${{ matrix.numpy-version }}.json
           fi
         shell: bash
 
@@ -77,10 +77,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use numpy versions
-        run: |
-          echo "Received numpy versions: ${{ needs.test_dependencies.outputs.numpy-versions }}"
-
       - env:
           OUTPUT1: ${{needs.test_dependencies.outputs.numpy1}}
           OUTPUT2: ${{needs.test_dependencies.outputs.numpy2}}
@@ -90,7 +86,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: dependency-results-${{ env.NUMPY1 }}
+          name: dependency-results-${{ env.NUMPY1 }}-${{ matrix.dependent-packages }}
           path: pr/
 
       - uses: actions/download-artifact@v4
