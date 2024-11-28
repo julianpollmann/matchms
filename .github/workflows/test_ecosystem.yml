@@ -125,7 +125,7 @@ jobs:
           numpy_versions=("${{ env.NUMPY1 }}" "${{ env.NUMPY2 }}")
 
           # Finde alle JSON-Dateien im pr/ Ordner
-          json_files=$(ls pr/*.json)
+          json_files=$(ls *.json)
 
           # Iteriere über alle JSON-Dateien
           for json_file in $json_files; do
