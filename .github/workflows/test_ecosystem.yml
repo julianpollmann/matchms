@@ -124,34 +124,27 @@ jobs:
           # Array für die numpy-Versionen, basierend auf den JSON-Dateien
           numpy_versions=("${{ env.NUMPY1 }}" "${{ env.NUMPY2 }}")
 
-          # Iteriere über alle numpy-Versionen
-          for numpy_version in $numpy_versions; do
-            # Extrahiere spec2vec-Daten aus der JSON-Datei
-            spec2vec_file="pr/${numpy_version}-spec2vec.json"
-            spec2vec_package=$(jq -r '.package' "$spec2vec_file")
-            spec2vec_version=$(jq -r '.version' "$spec2vec_file")
-            spec2vec_success=$(jq -r '.run_success' "$spec2vec_file")
+          # Finde alle JSON-Dateien im pr/ Ordner
+          json_files=$(ls pr/*.json)
 
-            # Extrahiere ms2query-Daten aus der JSON-Datei
-            ms2query_file="pr/${numpy_version}-ms2query.json"
-            ms2query_package=$(jq -r '.package' "$ms2query_file")
-            ms2query_version=$(jq -r '.version' "$ms2query_file")
-            ms2query_success=$(jq -r '.run_success' "$ms2query_file")
+          # Iteriere über alle JSON-Dateien
+          for json_file in $json_files; do
+            # Extrahiere numpy-version, package, version und run_success aus der JSON-Datei
+            numpy_version=$(jq -r '.["numpy-version"]' "$json_file")
+            package=$(jq -r '.package' "$json_file")
+            version=$(jq -r '.version' "$json_file")
+            run_success=$(jq -r '.run_success' "$json_file")
 
             # Bestimme die Badge-Farbe je nach Erfolg des Runs
-            spec2vec_color=$([[ "$spec2vec_success" == "true" ]] && echo "green" || echo "red")
-            ms2query_color=$([[ "$ms2query_success" == "true" ]] && echo "green" || echo "red")
+            badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
 
             # Zeile zur Tabelle hinzufügen
             cat <<EOF >> "$output_file"
              * - .. image:: https://img.shields.io/badge/numpy-${numpy_version}-green?logo=numpy :alt: numpy
-               - .. image:: https://img.shields.io/badge/${spec2vec_package}-${spec2vec_version}-${spec2vec_color} :alt: ${spec2vec_package}
-               - .. image:: https://img.shields.io/badge/${ms2query_package}-${ms2query_version}-${ms2query_color} :alt: ${ms2query_package}
+               - .. image:: https://img.shields.io/badge/${package}-${version}-${badge_color} :alt: ${package}
+               - .. image:: https://img.shields.io/badge/${package}-${version}-${badge_color} :alt: ${package}
           EOF
           done
-
-          # Ausgabe fertig
-          echo "Tabelle erstellt: $output_file"
 
       - uses: actions/upload-artifact@v4
         with:
