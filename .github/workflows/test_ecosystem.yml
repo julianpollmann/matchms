@@ -18,8 +18,10 @@ jobs:
         dependent-packages: ["spec2vec"]
         numpy-version: [1.25, 2.1]
     outputs:
-      numpy1: ${{ steps.set_numpy_version.outputs.numpy1 }}
-      numpy2: ${{ steps.set_numpy_version.outputs.numpy2 }}
+      numpy-versions: ${{ steps.finalize-versions.outputs.numpy_versions }}
+#    outputs:
+#      numpy1: ${{ steps.set_numpy_version.outputs.numpy1 }}
+#      numpy2: ${{ steps.set_numpy_version.outputs.numpy2 }}
 
     steps:
       - uses: actions/checkout@v4
@@ -38,16 +40,28 @@ jobs:
           pip check
         continue-on-error: true
 
-      - name: Set numpy version
-        id: set_numpy_version
+      - name: Set numpy versions
+        id: finalize-versions
         run: |
-          numpy_version="${{ matrix.numpy-version }}"
-
-          if [[ $numpy_version == 2* ]]; then
-              echo "numpy2=${numpy_version}" >> "$GITHUB_OUTPUT"
+          if [ -f numpy_versions.json ]; then
+            numpy_versions=$(cat numpy_versions.json | jq --arg version "${{ matrix.numpy-version }}" '. + [$version]')
           else
-              echo "numpy1=${numpy_version}" >> "$GITHUB_OUTPUT"
+            numpy_versions=$(echo '["${{ matrix.numpy-version }}"]' | jq '.')
           fi
+          echo "$numpy_versions" > numpy_versions.json
+          echo "::set-output name=numpy_versions::$numpy_versions"
+
+#      - name: Set numpy version
+#        id: set_numpy_version
+#        run: |
+#          numpy_version="${{ matrix.numpy-version }}"
+#          echo "artifact-name=dependency-results-${{ matrix.numpy-version }}" >> $GITHUB_OUTPUT
+
+#          if [[ $numpy_version == 2* ]]; then
+#              echo "numpy2=${numpy_version}" >> "$GITHUB_OUTPUT"
+#          else
+#              echo "numpy1=${numpy_version}" >> "$GITHUB_OUTPUT"
+#          fi
 
       - name: Save compatibility result
         run: |
@@ -68,21 +82,39 @@ jobs:
           name: dependency-results-${{ matrix.numpy-version }}
           path: pr/
 
+
+
+
+
   combine_results:
     needs: test_dependencies
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - name: Use numpy versions
+        run: |
+          echo "Received numpy versions: ${{ needs.test_dependencies.outputs.numpy-versions }}"
+
+#      - env:
+#          OUTPUT1: ${{needs.test_dependencies.outputs.numpy1}}
+#          OUTPUT2: ${{needs.test_dependencies.outputs.numpy2}}
+#        run: echo "$OUTPUT1 $OUTPUT2"
+
+
+      - name: Download all artifacts dynamically
+        run: |
+          ARTIFACTS="dependency-results-${{ needs.test_dependencies.outputs.artifact-names }}"
+          for ARTIFACT in $ARTIFACTS; do
+            echo "Downloading artifact: $ARTIFACT"
+            mkdir -p pr/$ARTIFACT
+            actions/download-artifact@v4 --name "$ARTIFACT" --path "pr/$ARTIFACT"
+          done
+
 #      - uses: actions/download-artifact@v4
 #        with:
 #          name: dependency-results-${{ matrix.numpy-version }}
 #          path: pr/
-
-      - env:
-          OUTPUT1: ${{needs.test_dependencies.outputs.numpy1}}
-          OUTPUT2: ${{needs.test_dependencies.outputs.numpy2}}
-        run: echo "$OUTPUT1 $OUTPUT2"
 
       - run: ls
 
