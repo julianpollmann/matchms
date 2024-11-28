@@ -38,6 +38,15 @@ jobs:
           pip check
         continue-on-error: true
 
+      - name: Set numpy version
+        id: set_numpy_version
+        run: |
+          if [[ $numpy_version == 2* ]]; then
+              echo "numpy2=${numpy_version}" >> "$GITHUB_OUTPUT"
+          else
+              echo "numpy1=${numpy_version}" >> "$GITHUB_OUTPUT"
+          fi
+
 #      - name: Set numpy versions
 #        id: finalize-versions
 #        run: |
@@ -49,17 +58,7 @@ jobs:
 #          echo "$numpy_versions" > numpy_versions.json
 #          echo "::set-output name=numpy_versions::$numpy_versions"
 
-      - name: Set numpy version
-        id: set_numpy_version
-        run: |
-#          numpy_version="${{ matrix.numpy-version }}"
-#          echo "artifact-name=dependency-results-${{ matrix.numpy-version }}" >> $GITHUB_OUTPUT
 
-          if [[ $numpy_version == 2* ]]; then
-              echo "numpy2=${numpy_version}" >> "$GITHUB_OUTPUT"
-          else
-              echo "numpy1=${numpy_version}" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Save compatibility result
         run: |
