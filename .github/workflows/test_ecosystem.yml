@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dependent-packages: ["spec2vec"]
+        dependent-packages: ["spec2vec", "ms2query"]
         numpy-version: [1.25, 2.1]
     outputs:
       numpy1: ${{ steps.set_numpy_version.outputs.numpy1 }}
@@ -109,43 +109,78 @@ jobs:
         run: |
           cd pr
 
-          output_file="dependency-matrix.rst"
+          numpy_versions=("$NUMPY1" "$NUMPY2")
 
-          # Start der Tabelle
-          cat <<EOF > "$output_file"
-          .. list-table::
-             :header-rows: 1
+          output_file="dependency-matrix.md"
+          echo "| NumPy Version | spec2vec Status | ms2query Status |" > output_file
+          echo "|---------------|-----------------|-----------------|" >> output_file
 
-             * - numpy
-               - package
-               - version
-               - success
-          EOF
+          for numpy_version in "${numpy_versions[@]}"; do
+            outstring="| ![Static Badge](https://img.shields.io/badge/numpy-${numpy_version}-lightgrey?logo=numpy) | "
 
-          # Array für die numpy-Versionen, basierend auf den JSON-Dateien
-          numpy_versions=("${{ env.NUMPY1 }}" "${{ env.NUMPY2 }}")
+            json_files=$(ls ${numpy_version}-*.json 2>/dev/null)
 
-          # Finde alle JSON-Dateien im pr/ Ordner
-          json_files=$(ls *.json)
+            echo $json_files
 
-          # Iteriere über alle JSON-Dateien
-          for json_file in $json_files; do
-            # Extrahiere numpy-version, package, version und run_success aus der JSON-Datei
-            numpy_version=$(jq -r '.["numpy-version"]' "$json_file")
-            package=$(jq -r '.package' "$json_file")
-            version=$(jq -r '.version' "$json_file")
-            run_success=$(jq -r '.run_success' "$json_file")
+            if [[ -n "$json_files" ]]; then
+                echo "Test1"
 
-            # Bestimme die Badge-Farbe je nach Erfolg des Runs
-            badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
+              for json_file in $json_files; do
+                echo "Test2"
+                package=$(jq -r '.package' "$json_file")
+                version=$(jq -r '.version' "$json_file")
+                run_success=$(jq -r '.run_success' "$json_file")
 
-            # Zeile zur Tabelle hinzufügen
-            cat <<EOF >> "$output_file"
-             * - .. image:: https://img.shields.io/badge/numpy-${numpy_version}-green?logo=numpy :alt: numpy
-               - .. image:: https://img.shields.io/badge/${package}-${version}-${badge_color} :alt: ${package}
-               - .. image:: https://img.shields.io/badge/${package}-${version}-${badge_color} :alt: ${package}
-          EOF
+                badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
+
+                outstring="${outstring}| ${badge_color} |"
+              done
+
+
+            fi
+
+             echo $outstring >> output_file
           done
+
+
+
+
+
+#          # Start der Tabelle
+#          cat <<EOF > "$output_file"
+#          .. list-table::
+#             :header-rows: 1
+#
+#             * - numpy
+#               - spec2vec
+#               - ms2query
+#               - ms2deepscore
+#          EOF
+#
+#          # Array für die numpy-Versionen, basierend auf den JSON-Dateien
+#          numpy_versions=("${{ env.NUMPY1 }}" "${{ env.NUMPY2 }}")
+#
+#          # Finde alle JSON-Dateien im pr/ Ordner
+#          json_files=$(ls *.json)
+#
+#          # Iteriere über alle JSON-Dateien
+#          for json_file in $json_files; do
+#            # Extrahiere numpy-version, package, version und run_success aus der JSON-Datei
+#            numpy_version=$(jq -r '.["numpy-version"]' "$json_file")
+#            package=$(jq -r '.package' "$json_file")
+#            version=$(jq -r '.version' "$json_file")
+#            run_success=$(jq -r '.run_success' "$json_file")
+#
+#            # Bestimme die Badge-Farbe je nach Erfolg des Runs
+#            badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
+#
+#            # Zeile zur Tabelle hinzufügen
+#            cat <<EOF >> "$output_file"
+#             * - .. image:: https://img.shields.io/badge/numpy-${numpy_version}-green?logo=numpy :alt: numpy
+#               - .. image:: https://img.shields.io/badge/${package}-${version}-${badge_color} :alt: ${package}
+#               - .. image:: https://img.shields.io/badge/${package}-${version}-${badge_color} :alt: ${package}
+#          EOF
+#          done
 
       - uses: actions/upload-artifact@v4
         with:
