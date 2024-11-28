@@ -117,8 +117,9 @@ jobs:
              :header-rows: 1
 
              * - numpy
-               - spec2vec
-               - ms2query
+               - package
+               - version
+               - success
           EOF
 
           # Array für die numpy-Versionen, basierend auf den JSON-Dateien
