@@ -86,13 +86,20 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: dependency-results-${{ env.NUMPY1 }}-${{ matrix.dependent-packages }}
           path: pr/
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: dependency-results-${{ env.NUMPY2 }}
-          path: pr/
+      - name: Display structure of downloaded files
+        run: ls -R
+
+#      - uses: actions/download-artifact@v4
+#        with:
+#          name: dependency-results-${{ env.NUMPY1 }}-${{ matrix.dependent-packages }}
+#          path: pr/
+#
+#      - uses: actions/download-artifact@v4
+#        with:
+#          name: dependency-results-${{ env.NUMPY2 }}
+#          path: pr/
 
       - run: ls
 
@@ -101,42 +108,42 @@ jobs:
           cd pr
           ls
 
-      - name: Create results table
-        run: |
-          cd pr
-
-          numpy_versions=("$NUMPY1" "$NUMPY2")
-
-          output_file="dependency-matrix.md"
-          echo "| NumPy Version | spec2vec Status | ms2query Status |" > output_file
-          echo "|---------------|-----------------|-----------------|" >> output_file
-
-          for numpy_version in "${numpy_versions[@]}"; do
-            outstring="| ![Static Badge](https://img.shields.io/badge/numpy-${numpy_version}-lightgrey?logo=numpy) | "
-
-            json_files=$(ls ${numpy_version}-*.json 2>/dev/null)
-
-            echo $json_files
-
-            if [[ -n "$json_files" ]]; then
-                echo "Test1"
-
-              for json_file in $json_files; do
-                echo "Test2"
-                package=$(jq -r '.package' "$json_file")
-                version=$(jq -r '.version' "$json_file")
-                run_success=$(jq -r '.run_success' "$json_file")
-
-                badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
-
-                outstring="${outstring}| ${badge_color} |"
-              done
-
-
-            fi
-
-             echo $outstring >> output_file
-          done
+#      - name: Create results table
+#        run: |
+#          cd pr
+#
+#          numpy_versions=("$NUMPY1" "$NUMPY2")
+#
+#          output_file="dependency-matrix.md"
+#          echo "| NumPy Version | spec2vec Status | ms2query Status |" > output_file
+#          echo "|---------------|-----------------|-----------------|" >> output_file
+#
+#          for numpy_version in "${numpy_versions[@]}"; do
+#            outstring="| ![Static Badge](https://img.shields.io/badge/numpy-${numpy_version}-lightgrey?logo=numpy) | "
+#
+#            json_files=$(ls ${numpy_version}-*.json 2>/dev/null)
+#
+#            echo $json_files
+#
+#            if [[ -n "$json_files" ]]; then
+#                echo "Test1"
+#
+#              for json_file in $json_files; do
+#                echo "Test2"
+#                package=$(jq -r '.package' "$json_file")
+#                version=$(jq -r '.version' "$json_file")
+#                run_success=$(jq -r '.run_success' "$json_file")
+#
+#                badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
+#
+#                outstring="${outstring}| ${badge_color} |"
+#              done
+#
+#
+#            fi
+#
+#             echo $outstring >> output_file
+#          done
 
 
 
