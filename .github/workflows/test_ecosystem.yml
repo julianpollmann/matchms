@@ -99,60 +99,34 @@ jobs:
           cd pr
 
           numpy_versions=("$NUMPY1" "$NUMPY2")
-
           output_file="dependency-matrix.md"
-          echo "| NumPy Version | spec2vec Status | ms2deepscore Status | ms2query Status |" > output_file
-          echo "|---------------|-----------------|-----------------|-----------------|" >> output_file
+
+          echo "| NumPy Version | spec2vec Status | ms2deepscore Status | ms2query Status |" > "$output_file"
+          echo "|---------------|-----------------|---------------------|-----------------|" >> "$output_file"
+
+          process_file() {
+            local file="$1"
+            if [[ -f "$file" ]]; then
+              local package version run_success badge_color
+              package=$(jq -r '.package' "$file")
+              version=$(jq -r '.version' "$file")
+              run_success=$(jq -r '.run_success' "$file")
+              badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
+              echo " ![Static Badge](https://img.shields.io/badge/${package}-${version}-${badge_color}) |"
+            else
+              echo " |"
+            fi
+          }
 
           for numpy_version in "${numpy_versions[@]}"; do
-            outstring="| ![Static Badge](https://img.shields.io/badge/numpy-${numpy_version}-lightgrey?logo=numpy) | "
+            outstring="| ![Static Badge](https://img.shields.io/badge/numpy-${numpy_version}-lightgrey?logo=numpy) |"
 
-            spec2vec_file="${numpy_version}-spec2vec.json"
-            ms2deepscore_file="${numpy_version}-ms2deepscore.json"
-            ms2query_file="${numpy_version}-ms2query.json"
+            outstring+=$(process_file "${numpy_version}-spec2vec.json")
+            outstring+=$(process_file "${numpy_version}-ms2deepscore.json")
+            outstring+=$(process_file "${numpy_version}-ms2query.json")
 
-            if [[ -n "$spec2vec_file" ]]; then
-              package=$(jq -r '.package' "$spec2vec_file")
-              version=$(jq -r '.version' "$spec2vec_file")
-              run_success=$(jq -r '.run_success' "$spec2vec_file")
-
-              badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
-
-              outstring="${outstring} ![Static Badge](https://img.shields.io/badge/${package}-${version}-${badge_color}) |"
-            else
-              outstring="${outstring} |"
-            fi
-
-            if [[ -n "$ms2deepscore_file" ]]; then
-              package=$(jq -r '.package' "$ms2deepscore_file")
-              version=$(jq -r '.version' "$ms2deepscore_file")
-              run_success=$(jq -r '.run_success' "$ms2deepscore_file")
-
-              badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
-
-              outstring="${outstring} ![Static Badge](https://img.shields.io/badge/${package}-${version}-${badge_color}) |"
-            else
-              outstring="${outstring} |"
-            fi
-
-            if [[ -n "$ms2query_file" ]]; then
-              package=$(jq -r '.package' "$ms2query_file")
-              version=$(jq -r '.version' "$ms2query_file")
-              run_success=$(jq -r '.run_success' "$ms2query_file")
-
-              badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
-
-              outstring="${outstring} ![Static Badge](https://img.shields.io/badge/${package}-${version}-${badge_color}) |"
-            else
-              outstring="${outstring} |"
-            fi
-
-            echo $outstring >> output_file
+            echo "$outstring" >> "$output_file"
           done
-
-
-
-
 
       - uses: actions/upload-artifact@v4
         with:
