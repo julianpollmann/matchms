@@ -1,4 +1,4 @@
-name: Test ecosystem with individual badges
+name: TestEcosystem
 
 on:
   pull_request:
@@ -10,15 +10,16 @@ on:
         default: ''
 
 jobs:
-  break:
+  test_dependencies:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        dependent-packages: [
-          "spec2vec",
-        ]
-#        pkgversion: [latest, stable]
+        dependent-packages: ["spec2vec", "ms2deepscore", "ms2query"]
+        numpy-version: [1.25, 2.1]
+    outputs:
+      numpy1: ${{ steps.set_numpy_version.outputs.numpy1 }}
+      numpy2: ${{ steps.set_numpy_version.outputs.numpy2 }}
 
     steps:
       - uses: actions/checkout@v4
@@ -26,208 +27,138 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependent packages
         run: |
           python -m pip install --upgrade pip poetry
+          pip install numpy==${{ matrix.numpy-version }}
           pip install ${{ matrix.dependent-packages }}
           pip install .
           pip check
         continue-on-error: true
 
+      - name: Set numpy version
+        id: set_numpy_version
+        run: |
+          numpy_version="${{ matrix.numpy-version }}"
+          if [[ $numpy_version == 2* ]]; then
+              echo "numpy2=${numpy_version}" >> "$GITHUB_OUTPUT"
+          else
+              echo "numpy1=${numpy_version}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Save compatibility result
         run: |
+          set -v
+          mkdir -p ./pr
+
+          version=$(pip show "${{ matrix.dependent-packages }}" | grep Version | awk '{print $2}')
+
           if pip check; then
-            echo ".. image:: https://img.shields.io/badge/${{ matrix.dependent-packages }}-latest-green :alt: ${{ matrix.dependent-packages }} compatible" >> ${{ matrix.dependent-packages }}.rst
+            echo "{\"package\": \"${{ matrix.dependent-packages }}\", \"version\": \"$version\", \"numpy-version\": \"${{ matrix.numpy-version }}\", \"run_success\": true}" >> pr/${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}.json
           else
-            echo ".. image:: https://img.shields.io/badge/${{ matrix.dependent-packages }}-latest-red :alt: ${{ matrix.dependent-packages }} incompatible" >> ${{ matrix.dependent-packages }}.rst
+            echo "{\"package\": \"${{ matrix.dependent-packages }}\", \"version\": \"$version\", \"numpy-version\": \"${{ matrix.numpy-version }}\", \"run_success\": false}" >> pr/${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}.json
           fi
         shell: bash
 
       - uses: actions/upload-artifact@v4
         with:
-          name: pr
+          name: dependency-results-${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}
           path: pr/
 
-  upload:
-    needs: break
+  combine_results:
+    needs: test_dependencies
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - env:
+          OUTPUT1: ${{needs.test_dependencies.outputs.numpy1}}
+          OUTPUT2: ${{needs.test_dependencies.outputs.numpy2}}
+        run: |
+          echo "NUMPY1=$OUTPUT1" >> $GITHUB_ENV
+          echo "NUMPY2=$OUTPUT2" >> $GITHUB_ENV
+
       - uses: actions/download-artifact@v4
         with:
-          name: pr
+          merge-multiple: true
           path: pr/
 
-      - run: ls
-      - run: |
+      - name: List files
+        run: |
           cd pr
-          echo "| Package name | latest | stable |" > MSG
-          echo "|--|--|--|" >> MSG
-          count=0
-          for file in *
-          do
-            [ "$file" == "NR" ] && continue
-            [ "$file" == "MSG" ] && continue
-            if [ $count == "0" ]; then
-              name=$(echo $file | cut -f1 -d-)
-              echo -n "| $name | "
-            else
-              echo -n "| "
-            fi
-            cat $file
-            if [ $count == "0" ]; then
-              echo -n " "
-              count=1
+          ls
+
+      - name: Create results table
+        run: |
+          cd pr
+
+          numpy_versions=("$NUMPY1" "$NUMPY2")
+          output_file="dependency-matrix.md"
+
+          echo "| NumPy Version | spec2vec Status | ms2deepscore Status | ms2query Status |" > "$output_file"
+          echo "|---------------|-----------------|---------------------|-----------------|" >> "$output_file"
+
+          process_file() {
+            local file="$1"
+            if [[ -f "$file" ]]; then
+              local package version run_success badge_color
+              package=$(jq -r '.package' "$file")
+              version=$(jq -r '.version' "$file")
+              run_success=$(jq -r '.run_success' "$file")
+              badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
+              echo " ![${package}-${version}](https://img.shields.io/badge/${package}-${version}-${badge_color}) |"
             else
               echo " |"
-              count=0
             fi
-          done >> MSG
+          }
+
+          for numpy_version in "${numpy_versions[@]}"; do
+            outstring="| ![numPy-${numpy_version}](https://img.shields.io/badge/numpy-${numpy_version}-lightgrey?logo=numpy) |"
+
+            outstring+=$(process_file "${numpy_version}-spec2vec.json")
+            outstring+=$(process_file "${numpy_version}-ms2deepscore.json")
+            outstring+=$(process_file "${numpy_version}-ms2query.json")
+
+            echo "$outstring" >> "$output_file"
+          done
 
       - uses: actions/upload-artifact@v4
         with:
-          name: pr
-          path: pr/
+          name: dependency-test-matrix
+          path: pr
 
+  comment:
+      needs: combine_results
+      runs-on: ubuntu-latest
+      if: ${{ needs.combine_results.result == 'success' }}
+      steps:
+        - uses: actions/download-artifact@v4
+          with:
+            name: dependency-test-matrix
+            path: pr/
 
-#jobs:
-#  test_ecosystem:
-#    uses: ./.github/workflows/test_dependency.yml
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        numpy-version: [1.25, 2.1]
-#        dependent-packages: ["ms2deepscore", "spec2vec"]
-#    with:
-#      numpy-version: ${{ matrix.numpy-version }}
-#      dependent-packages: ${{ matrix.dependent-packages }}
-#    secrets: inherit
+        - name: Add Pull Request Comment
+          uses: actions/github-script@v7
+          with:
+            script: |
+              const { pull_requests } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.payload.pull_request.head.sha,
+              });
 
-#jobs:
-#  test_ecosystem:
-#    name: Test ecosystem / numpy-${{ matrix.numpy-version }} / ${{ matrix.dependent-packages }}
-#    runs-on: ubuntu-latest
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        numpy-version: [1.25, 2.1]
-#        dependent-packages: ["package1", "package2"]
-#    steps:
-#      - uses: actions/checkout@v4
-#
-#      - name: Set up Python
-#        uses: actions/setup-python@v5
-#        with:
-#          python-version: '3.11'
-#
-#      - name: Install dependent packages
-#        run: |
-#          python -m pip install --upgrade pip poetry
-#          pip install numpy==${{ matrix.numpy-version }}
-#          pip install ${{ matrix.dependent-packages }}
-#          pip install .
-#          pip check
-#
-#      - name: Generate Badge Status
-#        run: |
-#          mkdir -p badges
-#          echo "{ \"schemaVersion\": 1, \"label\": \"numpy-${{ matrix.numpy-version }}\", \"message\": \"$([[ ${{ success() }} == 'true' ]] && echo success || echo failure)\", \"color\": \"$([[ ${{ success() }} == 'true' ]] && echo green || echo red)\" }" > badges/numpy-${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}.json
-#
-#      - name: Upload Badge Artifacts
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: badge-numpy-${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}
-#          path: badges/numpy-${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}.json
-#
-#
-#
-#
-##jobs:
-#  test_ecosystem:
-#    runs-on: ubuntu-latest
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        numpy-version: [ 1.25, 2.1 ]
-#        dependent-packages: [ 'ms2deepscore', 'ms2query', 'spec2vec' ]
-#    steps:
-#      - name: Trigger sub-jobs
-#        run: |
-#          echo "Creating separate jobs for each matrix combination"
-#        id: trigger
+              if (pull_requests.length === 0) {
+                console.log("No pull requests associated with this commit.");
+                return;
+              }
 
-#jobs:
-#  test_ecosystem:
-#    name: numpy-${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}
-#    runs-on: ubuntu-latest
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        numpy-version: [ 1.25, 2.1 ]
-#        dependent-packages: [ 'ms2deepscore', 'ms2query', 'spec2vec' ]
-#    outputs:
-#      json-path: result.json
-#
-#    steps:
-#      - uses: actions/checkout@v4
-#
-#      - name: Set up Python
-#        uses: actions/setup-python@v5
-#        with:
-#          python-version: '3.11'
-#
-#      - name: Install dependent packages
-#        run: |
-#          python -m pip install --upgrade pip poetry
-#          pip install numpy==${{ matrix.numpy-version }}
-#          pip install ${{ matrix.dependent-packages }}
-#          pip install .
-#          pip check
-#
-#      - name: Show pip list
-#        run: |
-#          pip list
-#
-#      - name: Create Badge URLs
-#        run: |
-#          echo "badge_url=https://github.com/julianpollmann/matchms/actions/workflows/test_ecosystem.yml/badge.svg?branch=${{ github.ref_name }}&numpy=${{ matrix.numpy-version }}&dependent-packages=${{ matrix.dependent-packages }}" >> $GITHUB_OUTPUT
+              const pullRequestNumber = pull_requests[0].number;
 
-
-
-#      - name: Generate job result
-#        run: |
-#          echo '{
-#            "job_name": "generate-artifact",
-#            "status": "${{ job.status }}",
-#            "results": {
-#              "numpy-version": "${{ matrix.numpy-version }}"
-#            }
-#          }' > result.json
-#
-#
-#      - name: Upload Artifact
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: job-result-${{ matrix.numpy-version }}
-#          path: result.json
-
-#      - name: Save status for Shields.io
-#        run: |
-#          echo "::set-output name=job_status::${{ job.status }}"
-#          echo "::set-output name=numpy_version::${{ matrix.numpy-version }}"
-#          echo "::set-output name=package::${{ matrix.dependent-packages }}"
-#
-#      - name: Generate Shields.io badge URL
-#        run: |
-#          BASE_URL="https://img.shields.io/badge"
-#          LABEL="Matchms-numpy_${{ matrix.numpy-version }}-${{ matrix.dependent-packages }}"
-#          STATUS="${{ steps.save-status.outputs.job_status }}"
-#          COLOR="green"
-#          if [[ "${STATUS}" == "failed" ]]; then
-#            COLOR="red"
-#          fi
-#          BADGE_URL="${BASE_URL}/${LABEL}-${STATUS}-${COLOR}"
-#          echo "Badge URL: ${BADGE_URL}"
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pullRequestNumber,
+                body: "🎉 The build-and-test job has completed successfully! Great work!",
+              });

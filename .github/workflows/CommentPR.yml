@@ -5,9 +5,8 @@ name: Comment on the pull request
 # access to secrets
 on:
   workflow_run:
-    workflows: ["test_ecosystem"]
-    types:
-      - completed
+    workflows: [TestEcosystem]
+    types: [completed]
 
 jobs:
   upload:
