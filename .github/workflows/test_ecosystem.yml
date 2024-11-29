@@ -160,6 +160,10 @@ jobs:
 
               const pullRequestNumber = pull_requests.data.number;
 
+              console.log("----------------------------")
+              console.log(pullRequestNumber)
+              console.log("----------------------------")
+
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
