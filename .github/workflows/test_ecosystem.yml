@@ -144,6 +144,13 @@ jobs:
           with:
             script: |
               console.log(context)
+              console.log("----------------------------")
+              console.log(context.repo.owner)
+              console.log(context.repo.repo)
+              console.log("----------------------------")
+
+
+
               const { pull_requests } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
