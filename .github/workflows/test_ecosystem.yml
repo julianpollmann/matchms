@@ -109,8 +109,8 @@ jobs:
           for numpy_version in "${numpy_versions[@]}"; do
             outstring="| ![Static Badge](https://img.shields.io/badge/numpy-${numpy_version}-lightgrey?logo=numpy) | "
 
-            spec2vec_file=$(ls ${numpy_version}-spec2vec.json 2>/dev/null)
-            ms2query_file=$(ls ${numpy_version}-ms2query.json 2>/dev/null)
+            spec2vec_file="1.25-spec2vec.json"
+            ms2query_file="1.25-spec2vec.json"
 
             if [[ -n "$spec2vec_file" ]]; then
               package=$(jq -r '.package' "$spec2vec_file")
