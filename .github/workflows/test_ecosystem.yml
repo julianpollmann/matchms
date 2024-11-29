@@ -147,16 +147,16 @@ jobs:
               console.log("----------------------------")
               console.log(context.repo.owner)
               console.log(context.repo.repo)
-              console.log(context.payload.pull_request.head.sha)
+              console.log(context.payload)
               console.log("----------------------------")
 
-
-
-              const { pull_requests } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              const response = await github.rest.repos.listPullRequestsAssociatedWithCommit({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 commit_sha: context.payload.pull_request.head.sha,
               });
+
+              console.log("API Response:", response);
 
               console.log(pull_requests)
 
