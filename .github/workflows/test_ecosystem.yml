@@ -150,7 +150,7 @@ jobs:
               console.log(context.payload)
               console.log("----------------------------")
 
-              const response = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              const pull_requests = await github.rest.repos.listPullRequestsAssociatedWithCommit({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 commit_sha: context.payload.pull_request.head.sha,
@@ -158,14 +158,14 @@ jobs:
 
               console.log("API Response:", response);
 
-              console.log(pull_requests)
-
-              if (pull_requests.length === 0) {
-                console.log("No pull requests associated with this commit.");
-                return;
-              }
-
-              const pullRequestNumber = pull_requests[0].number;
+#              console.log(pull_requests)
+#
+#              if (pull_requests.length === 0) {
+#                console.log("No pull requests associated with this commit.");
+#                return;
+#              }
+#
+              const pullRequestNumber = pull_requests.data.[0].number;
 
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
