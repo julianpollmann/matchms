@@ -149,6 +149,8 @@ jobs:
                 commit_sha: context.payload.pull_request.head.sha,
               });
 
+              console.log(pull_requests)
+
               if (pull_requests.length === 0) {
                 console.log("No pull requests associated with this commit.");
                 return;
