@@ -158,7 +158,7 @@ jobs:
 
               console.log("API Response:", pull_requests.data);
 
-              const pullRequestNumber = pull_requests.data.number;
+              const pullRequestNumber = pull_requests.data[0].number;
 
               console.log("----------------------------")
               console.log(pullRequestNumber)
