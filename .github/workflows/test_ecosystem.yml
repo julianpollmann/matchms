@@ -158,13 +158,6 @@ jobs:
 
               console.log("API Response:", response);
 
-#              console.log(pull_requests)
-#
-#              if (pull_requests.length === 0) {
-#                console.log("No pull requests associated with this commit.");
-#                return;
-#              }
-#
               const pullRequestNumber = pull_requests.data.[0].number;
 
               await github.rest.issues.createComment({
