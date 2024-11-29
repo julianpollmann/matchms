@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dependent-packages: ["spec2vec"]
+        dependent-packages: ["spec2vec", "ms2deepscore"]
         numpy-version: [1.25, 2.1]
     outputs:
       numpy1: ${{ steps.set_numpy_version.outputs.numpy1 }}
@@ -99,7 +99,6 @@ jobs:
       - name: Create results table
         run: |
           cd pr
-          ls
 
           numpy_versions=("$NUMPY1" "$NUMPY2")
 
