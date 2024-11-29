@@ -147,6 +147,7 @@ jobs:
               console.log("----------------------------")
               console.log(context.repo.owner)
               console.log(context.repo.repo)
+              console.log(context.payload.pull_request)
               console.log("----------------------------")
 
 
