@@ -99,6 +99,7 @@ jobs:
       - name: Create results table
         run: |
           cd pr
+          ls
 
           numpy_versions=("$NUMPY1" "$NUMPY2")
 
@@ -119,21 +120,21 @@ jobs:
 
               badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
 
-              outstring="${outstring}| ${badge_color} |"
+              outstring="${outstring} ${badge_color} |"
             else
-              outstring="${outstring}| |"
+              outstring="${outstring} |"
             fi
 
             if [[ -n "$ms2query_file" ]]; then
-              package=$(jq -r '.package' "$json_file")
-              version=$(jq -r '.version' "$json_file")
-              run_success=$(jq -r '.run_success' "$json_file")
+              package=$(jq -r '.package' "$spec2vec_file")
+              version=$(jq -r '.version' "$spec2vec_file")
+              run_success=$(jq -r '.run_success' "$spec2vec_file")
 
               badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
 
-              outstring="${outstring}| ${badge_color} |"
+              outstring="${outstring} ${badge_color} |"
             else
-              outstring="${outstring}| |"
+              outstring="${outstring} |"
             fi
 
             echo $outstring >> output_file
