@@ -151,15 +151,6 @@ jobs:
               const fs = require('fs');
               const path = require('path');
 
-              console.log(context)
-              console.log("----------------------------")
-              console.log(context.repo.owner)
-              console.log(context.repo.repo)
-              console.log(context.payload)
-              console.log("----------------------------")
-
-
-
               const pull_requests = await github.rest.repos.listPullRequestsAssociatedWithCommit({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -171,20 +162,16 @@ jobs:
                 return;
               }
 
-              console.log("API Response:", pull_requests.data);
-
               const pullRequestNumber = pull_requests.data[0].number;
-
-              console.log("----------------------------")
-              console.log(pullRequestNumber)
-              console.log("----------------------------")
-
               const filePath = path.join('pr', 'dependency-matrix.md');
               const fileContent = fs.readFileSync(filePath, 'utf8');
+
+              console.log("File Content:", fileContent);
+
 
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pullRequestNumber,
-                body: "### Dependency Test Matrix\n\n${fileContent}",
+                body: `### Dependency Test Matrix\n\n${fileContent}`,
               });
