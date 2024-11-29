@@ -139,10 +139,18 @@ jobs:
             name: dependency-test-matrix
             path: pr/
 
+        - name: List files
+          run: |
+            cd pr
+            ls
+
         - name: Add Pull Request Comment
           uses: actions/github-script@v7
           with:
             script: |
+              const fs = require('fs');
+              const path = require('path');
+
               console.log(context)
               console.log("----------------------------")
               console.log(context.repo.owner)
@@ -150,11 +158,18 @@ jobs:
               console.log(context.payload)
               console.log("----------------------------")
 
+
+
               const pull_requests = await github.rest.repos.listPullRequestsAssociatedWithCommit({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 commit_sha: context.payload.pull_request.head.sha,
               });
+
+              if (!pull_requests.data.length) {
+                console.log("No pull requests associated with this commit.");
+                return;
+              }
 
               console.log("API Response:", pull_requests.data);
 
@@ -164,9 +179,12 @@ jobs:
               console.log(pullRequestNumber)
               console.log("----------------------------")
 
+              const filePath = path.join('pr', 'dependency-matrix.md');
+              const fileContent = fs.readFileSync(filePath, 'utf8');
+
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pullRequestNumber,
-                body: "🎉 The build-and-test job has completed successfully! Great work!",
+                body: "### Dependency Test Matrix\n\n${fileContent}",
               });
