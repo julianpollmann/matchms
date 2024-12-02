@@ -193,34 +193,28 @@ jobs:
 
       - name: Update README with dependency matrix
         run: |
-          print("test")
-#          import re
-#
-#          readme_path = "README.rst"
-#
-#          # Der Abschnitt, den du aktualisieren möchtest (als Beispiel)
-#          start_marker = ".. START GENERATED SECTION .."
-#          end_marker = ".. END GENERATED SECTION .."
-#          new_content = """
-#          This is the updated content for the section.
-#          It will replace the content between the markers.
-#          """
-#
-#          # Datei einlesen
-#          with open(readme_path, "r") as file:
-#              content = file.read()
-#
-#          # Abschnitt ersetzen
-#          updated_content = re.sub(
-#              f"{re.escape(start_marker)}.*?{re.escape(end_marker)}",
-#              f"{start_marker}\n{new_content}\n{end_marker}",
-#              content,
-#              flags=re.DOTALL,
-#          )
-#
-#          # Datei schreiben
-#          with open(readme_path, "w") as file:
-#              file.write(updated_content)
-#
-#          print("README.rst section updated successfully.")
+          import re
 
+          readme_path = "README.rst"
+          matrix_path = os.path.join("test-output", "dependency-matrix.md")
+
+          start_marker = "<!-- compatibility matrix start -->"
+          end_marker = "<!-- compatibility matrix end -->"
+
+          with open(matrix_path, "r", encoding="utf-8") as matrix_file:
+            dependency_matrix = matrix_file.read()
+
+          with open(readme_path, "r") as file:
+              content = file.read()
+
+          updated_content = re.sub(
+              f"{re.escape(start_marker)}.*?{re.escape(end_marker)}",
+              f"{start_marker}\n{dependency_matrix}\n{end_marker}",
+              content,
+              flags=re.DOTALL,
+          )
+
+          with open(readme_path, "w") as file:
+              file.write(updated_content)
+
+          print("README.rst section updated successfully.")

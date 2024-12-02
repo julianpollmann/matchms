@@ -155,6 +155,16 @@ To date, we are aware of:
 
 *(if you know of any other packages that are fully compatible with matchms, let us know!)*
 
+
+ecosystem compatibility
+-----------------------
+<!-- compatibility matrix start -->
+
+<!-- compatibility matrix end -->
+
+
+
+
 Introduction
 ============
 
