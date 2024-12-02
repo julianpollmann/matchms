@@ -113,7 +113,7 @@ jobs:
               version=$(jq -r '.version' "$file")
               run_success=$(jq -r '.run_success' "$file")
               badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
-              echo ".. image:: https://img.shields.io/badge/${package}-${version}-${badge_color} :alt: ${package}"
+              echo ".. image:: https://img.shields.io/badge/${package}-${version}-${badge_color}"
             else
               echo " "
             fi
@@ -132,7 +132,7 @@ jobs:
           path: test-output
 
   comment_pr:
-    name: Comment dependency matrix on PR
+    name: Comment PR
     needs: combine_results
     runs-on: ubuntu-latest
     if: ${{ needs.combine_results.result == 'success' && github.ref != 'refs/heads/master' }}
@@ -182,7 +182,7 @@ jobs:
             });
 
   update_readme:
-    name: Update dependency matrix in README
+    name: Update README
     needs: combine_results
     runs-on: ubuntu-latest
     if: ${{ needs.combine_results.result == 'success' && github.ref == 'refs/heads/master' }}
