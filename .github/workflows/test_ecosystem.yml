@@ -2,6 +2,9 @@ name: Test Ecosystem
 
 on:
   pull_request:
+  push:
+    branches:
+      - master
   workflow_dispatch:
     inputs:
       tag:
@@ -124,51 +127,51 @@ jobs:
           name: dependency-test-matrix
           path: test-output
 
-  comment:
-      needs: combine_results
-      runs-on: ubuntu-latest
-      if: ${{ needs.combine_results.result == 'success' }}
-      steps:
-        - uses: actions/download-artifact@v4
-          with:
-            name: dependency-test-matrix
-            path: test-output/
+  comment_pr:
+    needs: combine_results
+    runs-on: ubuntu-latest
+    if: ${{ needs.combine_results.result == 'success' && github.ref != 'refs/heads/master' }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dependency-test-matrix
+          path: test-output/
 
-        - name: List files
-          run: |
-            cd test-output
-            ls
+      - name: List files
+        run: |
+          cd test-output
+          ls
 
-        - name: Add Pull Request Comment
-          uses: actions/github-script@v7
-          with:
-            script: |
-              const fs = require('fs');
-              const path = require('path');
+      - name: Add Pull Request Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
 
-              const pull_requests = await github.rest.repos.listPullRequestsAssociatedWithCommit({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                commit_sha: context.payload.pull_request.head.sha,
-              });
+            const pull_requests = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.payload.pull_request.head.sha,
+            });
 
-              if (!pull_requests.data.length) {
-                console.log("No pull requests associated with this commit.");
-                return;
-              }
+            if (!pull_requests.data.length) {
+              console.log("No pull requests associated with this commit.");
+              return;
+            }
 
-              const pullRequestNumber = pull_requests.data[0].number;
-              const filePath = path.join('test-output', 'dependency-matrix.md');
+            const pullRequestNumber = pull_requests.data[0].number;
+            const filePath = path.join('test-output', 'dependency-matrix.md');
 
-              if (!fs.existsSync(filePath)) {
-                console.log("File not found:", filePath);
-                return;
-              }
-              const fileContent = fs.readFileSync(filePath, 'utf8');
+            if (!fs.existsSync(filePath)) {
+              console.log("File not found:", filePath);
+              return;
+            }
+            const fileContent = fs.readFileSync(filePath, 'utf8');
 
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pullRequestNumber,
-                body: `### Dependency Test Matrix\n\n${fileContent}`,
-              });
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pullRequestNumber,
+              body: `### Dependency Test Matrix\n\n${fileContent}`,
+            });
