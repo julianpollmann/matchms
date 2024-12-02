@@ -181,6 +181,8 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ needs.combine_results.result == 'success' && github.ref == 'refs/heads/master' }}
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
           name: dependency-test-matrix
