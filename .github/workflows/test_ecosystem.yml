@@ -194,30 +194,40 @@ jobs:
       - name: Update README with dependency matrix
         run: |
           python <<EOF
-            import os
-            import re
+          import os
+          import re
 
-            readme_path = "README.rst"
-            matrix_path = os.path.join("test-output", "dependency-matrix.md")
+          readme_path = "README.rst"
+          matrix_path = os.path.join("test-output", "dependency-matrix.md")
 
-            start_marker = "<!-- compatibility matrix start -->"
-            end_marker = "<!-- compatibility matrix end -->"
+          start_marker = "<!-- compatibility matrix start -->"
+          end_marker = "<!-- compatibility matrix end -->"
 
-            with open(matrix_path, "r", encoding="utf-8") as matrix_file:
+          with open(matrix_path, "r", encoding="utf-8") as matrix_file:
               dependency_matrix = matrix_file.read()
 
-            with open(readme_path, "r") as file:
-                content = file.read()
+          with open(readme_path, "r") as file:
+              content = file.read()
 
-            updated_content = re.sub(
-                f"{re.escape(start_marker)}.*?{re.escape(end_marker)}",
-                f"{start_marker}\n{dependency_matrix}\n{end_marker}",
-                content,
-                flags=re.DOTALL,
-            )
+          updated_content = re.sub(
+              f"{re.escape(start_marker)}.*?{re.escape(end_marker)}",
+              f"{start_marker}\n{dependency_matrix}\n{end_marker}",
+              content,
+              flags=re.DOTALL,
+          )
 
-            with open(readme_path, "w") as file:
-                file.write(updated_content)
+          with open(readme_path, "w") as file:
+              file.write(updated_content)
 
-            print("README.rst section updated successfully.")
+          print("README.rst section updated successfully.")
           EOF
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.rst
+          git commit -m "Update dependency matrix in README"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
