@@ -159,6 +159,10 @@ To date, we are aware of:
 ecosystem compatibility
 -----------------------
 <!-- compatibility matrix start -->
+| NumPy Version | spec2vec Status | ms2deepscore Status | ms2query Status |
+|---------------|-----------------|---------------------|-----------------|
+| ![numPy-1.25](https://img.shields.io/badge/numpy-1.25-lightgrey?logo=numpy) | ![spec2vec-0.8.0](https://img.shields.io/badge/spec2vec-0.8.0-red) | ![ms2deepscore-2.4.0](https://img.shields.io/badge/ms2deepscore-2.4.0-green) | ![ms2query-1.5.3](https://img.shields.io/badge/ms2query-1.5.3-red) |
+| ![numPy-2.1](https://img.shields.io/badge/numpy-2.1-lightgrey?logo=numpy) | ![spec2vec-0.8.0](https://img.shields.io/badge/spec2vec-0.8.0-red) | ![ms2deepscore-2.4.0](https://img.shields.io/badge/ms2deepscore-2.4.0-green) | ![ms2query-1.5.3](https://img.shields.io/badge/ms2query-1.5.3-red) |
 
 <!-- compatibility matrix end -->
 
