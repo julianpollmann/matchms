@@ -95,7 +95,7 @@ jobs:
           echo "| NumPy Version | spec2vec Status | ms2deepscore Status | ms2query Status |" > "$output_file"
           echo "|---------------|-----------------|---------------------|-----------------|" >> "$output_file"
 
-          test-outputocess_file() {
+          process_file() {
             local file="$1"
             if [[ -f "$file" ]]; then
               local package version run_success badge_color
