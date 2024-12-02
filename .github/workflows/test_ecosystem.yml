@@ -14,6 +14,7 @@ on:
 
 jobs:
   test_dependencies:
+    name: Test dependencies
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -71,6 +72,7 @@ jobs:
           path: test-output/
 
   combine_results:
+    name: Combine results and write table
     needs: test_dependencies
     runs-on: ubuntu-latest
     steps:
@@ -130,6 +132,7 @@ jobs:
           path: test-output
 
   comment_pr:
+    name: Comment dependency matrix on PR
     needs: combine_results
     runs-on: ubuntu-latest
     if: ${{ needs.combine_results.result == 'success' && github.ref != 'refs/heads/master' }}
@@ -179,6 +182,7 @@ jobs:
             });
 
   update_readme:
+    name: Update dependency matrix in README
     needs: combine_results
     runs-on: ubuntu-latest
     if: ${{ needs.combine_results.result == 'success' && github.ref == 'refs/heads/master' }}
