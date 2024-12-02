@@ -159,6 +159,7 @@ To date, we are aware of:
 ecosystem compatibility
 -----------------------
 <!-- compatibility matrix start -->
+
 +-----------------+------------------+----------------------+------------------+
 | NumPy Version   | spec2vec Status | ms2deepscore Status | ms2query Status  |
 +=================+==================+======================+==================+
