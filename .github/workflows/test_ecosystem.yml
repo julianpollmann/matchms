@@ -207,8 +207,8 @@ jobs:
           readme_path = "README.rst"
           matrix_path = os.path.join("test-output", "dependency-matrix.rst")
 
-          start_marker = "<!-- compatibility matrix start -->"
-          end_marker = "<!-- compatibility matrix end -->"
+          start_marker = ".. compatibility matrix start"
+          end_marker = ".. compatibility matrix end"
 
           with open(matrix_path, "r", encoding="utf-8") as matrix_file:
               dependency_matrix = matrix_file.read()

@@ -159,7 +159,7 @@ To date, we are aware of:
 ecosystem compatibility
 -----------------------
 
-<!-- compatibility matrix start -->
+.. compatibility matrix start
 
 .. list-table::
    :header-rows: 1
@@ -177,7 +177,7 @@ ecosystem compatibility
      - .. image:: https://img.shields.io/badge/ms2deepscore-2.4.0-green :alt: ms2deepscore
      - .. image:: https://img.shields.io/badge/ms2query-1.5.3-red :alt: ms2query
 
-<!-- compatibility matrix end -->
+.. compatibility matrix end
 
 
 
