@@ -95,9 +95,13 @@ jobs:
           numpy_versions=("$NUMPY1" "$NUMPY2")
           output_file="dependency-matrix.rst"
 
-          echo "+-----------------+------------------+----------------------+------------------+" > "$output_file"
-          echo "| NumPy Version   | spec2vec Status | ms2deepscore Status | ms2query Status  |" >> "$output_file"
-          echo "+=================+==================+======================+==================+" >> "$output_file"
+          echo ".. list-table::" > "$output_file"
+          echo "   :header-rows: 1" >> "$output_file"
+          echo "" >> "$output_file"
+          echo "   * - NumPy Version" >> "$output_file"
+          echo "     - spec2vec Status" >> "$output_file"
+          echo "     - ms2deepscore Status" >> "$output_file"
+          echo "     - ms2query Status" >> "$output_file"
 
           process_file() {
             local file="$1"
@@ -107,21 +111,17 @@ jobs:
               version=$(jq -r '.version' "$file")
               run_success=$(jq -r '.run_success' "$file")
               badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
-              echo " ![${package}-${version}](https://img.shields.io/badge/${package}-${version}-${badge_color}) "
+              echo ".. image:: https://img.shields.io/badge/${package}-${version}-${badge_color} :alt: ${package}-${version}"
             else
               echo " "
             fi
           }
 
           for numpy_version in "${numpy_versions[@]}"; do
-            outstring="| ![numPy-${numpy_version}](https://img.shields.io/badge/numpy-${numpy_version}-lightgrey?logo=numpy) |"
-
-            outstring+="$(process_file "${numpy_version}-spec2vec.json") |"
-            outstring+="$(process_file "${numpy_version}-ms2deepscore.json") |"
-            outstring+="$(process_file "${numpy_version}-ms2query.json") |"
-
-            echo "$outstring" >> "$output_file"
-            echo "+-----------------+------------------+----------------------+------------------+" >> "$output_file"
+            echo "   * - .. image:: https://img.shields.io/badge/numpy-${numpy_version}-lightgrey?logo=numpy :alt: numpy" >> "$output_file"
+            echo "     - $(process_file "${numpy_version}-spec2vec.json")" >> "$output_file"
+            echo "     - $(process_file "${numpy_version}-ms2deepscore.json")" >> "$output_file"
+            echo "     - $(process_file "${numpy_version}-ms2query.json")" >> "$output_file"
           done
 
       - uses: actions/upload-artifact@v4
