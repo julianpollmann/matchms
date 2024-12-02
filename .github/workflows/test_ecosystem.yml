@@ -111,7 +111,7 @@ jobs:
               version=$(jq -r '.version' "$file")
               run_success=$(jq -r '.run_success' "$file")
               badge_color=$([[ "$run_success" == "true" ]] && echo "green" || echo "red")
-              echo ".. image:: https://img.shields.io/badge/${package}-${version}-${badge_color} :alt: ${package}-${version}"
+              echo ".. image:: https://img.shields.io/badge/${package}-${version}-${badge_color} :alt: ${package}"
             else
               echo " "
             fi
@@ -218,7 +218,7 @@ jobs:
 
           updated_content = re.sub(
               f"{re.escape(start_marker)}.*?{re.escape(end_marker)}",
-              f"{start_marker}\n{dependency_matrix}\n{end_marker}",
+              f"{start_marker}\n\n{dependency_matrix}\n{end_marker}",
               content,
               flags=re.DOTALL,
           )
