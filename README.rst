@@ -97,7 +97,7 @@ Test
 Pipeline class
 ==============
 
-To make typical matchms workflows (data import, processing, score computations) more accessible to users, matchms now offers a `Pipeline` class to handle complex workflows. This also allows to create, import, export, or modify workflows using yaml files. See code examples below (and soon: updated tutorial).
+To make typical matchms workflows (data import, processing, score computations) more accessible to users, matchms now offers a `Pipeline` class to handle complex workflows. This also allows to create, import, export, or modify workflows using yaml files. See code examples below (and soon: updated tutorial). Test
 
 Sparse scores array
 ===================
