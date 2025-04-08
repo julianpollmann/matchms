@@ -36,9 +36,10 @@ jobs:
           poetry run pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml
       - name: Correct coverage paths
         run: sed -i "s+$PWD/++g" coverage.xml
-      - name: Check style against standards using prospector
-        shell: bash -l {0}
-        run: prospector -o grouped -o pylint:pylint-report.txt
+      - name: Run ruff linter
+        run: ruff check
+      - name: Run ruff formatter
+        run: ruff format --check
       - name: Store PR metadata in json file
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -56,5 +57,3 @@ jobs:
             coverage.xml
             xunit-result.xml
             pr_metadata.json
-      - name: Check whether import statements are used consistently
-        run: isort . --check-only --diff
