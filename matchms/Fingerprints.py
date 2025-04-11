@@ -1,6 +1,5 @@
 import json
 import logging
-from matchms.typing import SpectrumType
 from typing import Optional
 import numpy as np
 import pandas as pd
@@ -12,7 +11,7 @@ from matchms.filtering.filter_utils.smile_inchi_inchikey_conversions import (
     is_valid_inchikey,
     is_valid_smiles,
 )
-
+from matchms.typing import SpectrumType
 from .utils import to_camel_case
 
 
