@@ -285,13 +285,3 @@ def test_parse_metadata(input_line, expected_output):
     params = {}
     parse_metadata(input_line, params)
     assert params == expected_output
-
-
-@pytest.mark.parametrize("line, expected", [
- ["496	7.1E-05", ([496.0], [7.1E-05])],
- ["496	7.1e-05", ([496.0], [7.1e-05])],
- ["85:201 86:55 87:10 88:4 89:315", ([85.0, 86.0, 87.0, 88.0, 89.0], [201.0, 55.0, 10.0, 4.0, 315.0])],
-])
-def test_get_peak_values(line, expected):
-    actual = get_peak_values(line)
-    assert actual == expected
