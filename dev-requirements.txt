@@ -66,7 +66,7 @@ poetry-bumpversion==0.3.3 ; python_version >= "3.10" and python_version < "3.14"
 poetry-core==2.2.0 ; python_version >= "3.10" and python_version < "3.14"
 poetry==2.2.0 ; python_version >= "3.10" and python_version < "3.14"
 pre-commit==4.3.0 ; python_version >= "3.10" and python_version < "3.14"
-pubchempy @ git+https://github.com/mcs07/PubChemPy.git@a5d86463dab32dd3589479cf9b9737e26651dd7d ; python_version >= "3.10" and python_version < "3.14"
+pubchempy==1.0.5 ; python_version >= "3.10" and python_version < "3.14"
 pycparser==2.23 ; python_version >= "3.10" and python_version < "3.14" and implementation_name != "PyPy" and (platform_python_implementation != "PyPy" or sys_platform == "darwin") and (sys_platform == "linux" or sys_platform == "darwin")
 pydantic-core==2.33.2 ; python_version >= "3.10" and python_version < "3.14"
 pydantic==2.11.9 ; python_version >= "3.10" and python_version < "3.14"
